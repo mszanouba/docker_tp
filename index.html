@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 Gestionnaire de Tâches - API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .add-task-section {
+            padding: 30px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        select {
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            background: white;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            font-size: 0.9em;
+            padding: 8px 15px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .tasks-list {
+            padding: 30px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+            border-left-color: #28a745;
+        }
+
+        .task-checkbox {
+            width: 25px;
+            height: 25px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-text {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .priority-badge {
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .priority-Haute {
+            background: #dc3545;
+            color: white;
+        }
+
+        .priority-Moyenne {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .priority-Basse {
+            background: #28a745;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 30px;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-item {
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Gestionnaire de Tâches</h1>
+            <p>Organisez votre vie avec style ✨</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalTasks">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="completedTasks">0</div>
+                <div class="stat-label">Terminées ✅</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="pendingTasks">0</div>
+                <div class="stat-label">En cours ⏳</div>
+            </div>
+        </div>
+
+        <div class="add-task-section">
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="Entrez une nouvelle tâche...">
+                <select id="prioritySelect">
+                    <option value="Haute">🔴 Haute</option>
+                    <option value="Moyenne" selected>🟡 Moyenne</option>
+                    <option value="Basse">🟢 Basse</option>
+                </select>
+                <button class="btn btn-primary" onclick="addTask()">➕ Ajouter</button>
+            </div>
+        </div>
+
+        <div class="tasks-list" id="tasksList">
+            <div class="loading">Chargement des tâches...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+
+        // Charger les tâches au démarrage
+        window.addEventListener('DOMContentLoaded', loadTasks);
+
+        // Ajouter une tâche avec Enter
+        document.getElementById('taskInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+
+        async function loadTasks() {
+            try {
+                const response = await fetch(`${API_URL}/tasks`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayTasks(data.tasks);
+                    updateStats(data.total, data.completed, data.pending);
+                }
+            } catch (error) {
+                showError('Erreur de connexion à l\'API. Assurez-vous que le serveur Flask est démarré.');
+            }
+        }
+
+        async function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const prioritySelect = document.getElementById('prioritySelect');
+            const text = taskInput.value.trim();
+
+            if (!text) {
+                alert('Veuillez entrer une tâche!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/tasks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        priority: prioritySelect.value
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    taskInput.value = '';
+                    loadTasks();
+                }
+            } catch (error) {
+                showError('Erreur lors de l\'ajout de la tâche');
+            }
+        }
+
+        async function toggleTask(taskId) {
+            try {
+                const response = await fetch(`${API_URL}/tasks/${taskId}/toggle`, {
+                    method: 'PATCH'
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadTasks();
+                }
+            } catch (error) {
+                showError('Erreur lors de la modification de la tâche');
+            }
+        }
+
+        async function deleteTask(taskId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette tâche?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/tasks/${taskId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadTasks();
+                }
+            } catch (error) {
+                showError('Erreur lors de la suppression de la tâche');
+            }
+        }
+
+        function displayTasks(tasks) {
+            const tasksList = document.getElementById('tasksList');
+
+            if (tasks.length === 0) {
+                tasksList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <h3>Aucune tâche</h3>
+                        <p>Commencez par ajouter votre première tâche!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            tasksList.innerHTML = tasks.map(task => `
+                <div class="task-item ${task.completed ? 'completed' : ''}">
+                    <input type="checkbox" 
+                           class="task-checkbox" 
+                           ${task.completed ? 'checked' : ''} 
+                           onchange="toggleTask(${task.id})">
+                    <div class="task-content">
+                        <div class="task-text ${task.completed ? 'completed' : ''}">${task.text}</div>
+                        <div class="task-meta">
+                            <span class="priority-badge priority-${task.priority}">${task.priority}</span>
+                            <span>⏰ ${task.time}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteTask(${task.id})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function updateStats(total, completed, pending) {
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('pendingTasks').textContent = pending;
+        }
+
+        function showError(message) {
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = `
+                <div class="error-message">
+                    ⚠️ ${message}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
